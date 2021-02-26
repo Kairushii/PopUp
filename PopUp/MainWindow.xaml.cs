@@ -22,7 +22,6 @@ namespace PopUp
     {
         public MainWindow()
         {
-           
             InitializeComponent();
         }
     }
