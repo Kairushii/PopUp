@@ -27,7 +27,7 @@ namespace PopUp
         protected override void OnStartup(StartupEventArgs e)
         {
             _notifyIcon.Icon = new Icon("Images/envelope_50px.ico");
-            _notifyIcon.Text = "SingletonSean";
+            _notifyIcon.Text = "PopUp Email";
             _notifyIcon.Click += NotifyIcon_Click;
 
             _notifyIcon.ContextMenuStrip = new Forms.ContextMenuStrip();

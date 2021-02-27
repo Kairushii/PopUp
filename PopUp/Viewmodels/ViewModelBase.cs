@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PopUp.Viewmodels
 {
-    public class ViewModelBase
+    public class ViewModelBase : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
