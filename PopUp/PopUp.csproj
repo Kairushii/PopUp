@@ -76,8 +76,12 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Commands\BaseCommand.cs" />
+    <Compile Include="Commands\NotifyCommand.cs" />
     <Compile Include="Commands\StartCommand.cs" />
+    <Compile Include="Service\INotificationService.cs" />
+    <Compile Include="Service\NotifyIconNotificationService.cs" />
     <Compile Include="Stores\TimerStore.cs" />
+    <Compile Include="Viewmodels\NotifyViewModel.cs" />
     <Compile Include="Viewmodels\TimerViewModel.cs" />
     <Compile Include="Viewmodels\ViewModelBase.cs" />
     <Page Include="MainWindow.xaml">
@@ -125,6 +129,8 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="View\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

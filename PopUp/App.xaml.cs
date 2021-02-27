@@ -1,6 +1,8 @@
-﻿using PopUp.Stores;
+﻿using PopUp.Service;
+using PopUp.Stores;
 using PopUp.Viewmodels;
 using System;
+using System.Drawing;
 using System.Windows;
 using Forms = System.Windows.Forms;
 
@@ -12,8 +14,8 @@ namespace PopUp
     /// </summary>
     public partial class App : Application
     {
-        
         private readonly Forms.NotifyIcon _notifyIcon;
+
         private TimerStore _timerStore;
         private TimerViewModel _timerViewModel;
 
@@ -24,27 +26,26 @@ namespace PopUp
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            _timerStore = new TimerStore();
-            _timerViewModel = new TimerViewModel(_timerStore);
-
-            _notifyIcon.Text = "PopUp Email";
-            _notifyIcon.Icon = new System.Drawing.Icon("Images/envelope_50px.ico");
-            _notifyIcon.Visible = true;
+            _notifyIcon.Icon = new Icon("Images/envelope_50px.ico");
+            _notifyIcon.Text = "SingletonSean";
             _notifyIcon.Click += NotifyIcon_Click;
 
-            //_notifyIcon.ContextMenuStrip = new Forms.ContextMenuStrip();
-            //_notifyIcon.ContextMenuStrip.Items.Add("Set Timer", System.Drawing.Image.FromFile("Images/envelope_50px.ico"), OnStatusClicked);
+            _notifyIcon.ContextMenuStrip = new Forms.ContextMenuStrip();
+            _notifyIcon.ContextMenuStrip.Items.Add("Status", Image.FromFile("Images/envelope_50px.ico"), OnStatusClicked);
+        
+
+            _notifyIcon.Visible = true;
+
+            _timerStore = new TimerStore(new NotifyIconNotificationService(_notifyIcon));
+            _timerViewModel = new TimerViewModel(_timerStore);
+
             MainWindow = new MainWindow();
             MainWindow.DataContext = _timerViewModel;
-            MainWindow.Hide();  
+            MainWindow.Show();
 
             base.OnStartup(e);
         }
 
-        //private void OnStatusClicked(object sender, EventArgs e) 
-        //{
-
-        //}
         private void OnStatusClicked(object sender, EventArgs e)
         {
             string status = _timerStore.IsRunning ? "Timer is running." : "Timer is stopped.";
@@ -60,6 +61,9 @@ namespace PopUp
         protected override void OnExit(ExitEventArgs e)
         {
             _notifyIcon.Dispose();
+            _timerViewModel.Dispose();
+            _timerStore.Dispose();
+
             base.OnExit(e);
         }
     }

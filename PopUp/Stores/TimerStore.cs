@@ -1,4 +1,5 @@
 ﻿
+using PopUp.Service;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,34 +9,60 @@ using System.Timers;
 
 namespace PopUp.Stores
 {
-    public class TimerStore
+    public class TimerStore : IDisposable
     {
+        private readonly INotificationService _notificationService;
         private readonly Timer _timer;
 
         private DateTime _endTime;
+        private bool _wasRunning;
+        private int _lastDurationInSeconds;
 
-        public double RemainingSeconds => TimeSpan.FromTicks(_endTime.Ticks).TotalSeconds - TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
+        private double EndTimeCurrentTimeSecondsDifference => TimeSpan.FromTicks(_endTime.Ticks).TotalSeconds - TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
+        public double RemainingSeconds => EndTimeCurrentTimeSecondsDifference > 0 ? EndTimeCurrentTimeSecondsDifference : 0;
+
+        public bool IsRunning => RemainingSeconds > 0;
 
         public event Action RemainingSecondsChanged;
-        public bool IsRunning => RemainingSeconds > 0;
+
+        public TimerStore(INotificationService notificationService)
+        {
+            _notificationService = notificationService;
+            _notificationService.NotificationAccepted += NotificationService_NotificationAccepted;
+
+            _timer = new Timer(1000);
+            _timer.Elapsed += Timer_Elapsed;
+        }
 
         public void Start(int durationInSeconds)
         {
+            _lastDurationInSeconds = durationInSeconds;
+
             _timer.Start();
             _endTime = DateTime.Now.AddSeconds(durationInSeconds);
 
             OnRemainingSecondsChanged();
         }
 
-        public TimerStore()
-        {
-            _timer = new Timer(1000);
-            _timer.Elapsed += Timer_Elapsed;
-        }
-
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             OnRemainingSecondsChanged();
+
+            if (_wasRunning && !IsRunning)
+            {
+                _notificationService.Notify("Timer", "The timer has completed.",
+                    3000, NotificationType.RestartTimer, System.Windows.Forms.ToolTipIcon.Info);
+            }
+
+            _wasRunning = IsRunning;
+        }
+
+        private void NotificationService_NotificationAccepted(NotificationType lastNotificationType)
+        {
+            if (lastNotificationType == NotificationType.RestartTimer)
+            {
+                Start(_lastDurationInSeconds);
+            }
         }
 
         private void OnRemainingSecondsChanged()
@@ -43,6 +70,10 @@ namespace PopUp.Stores
             RemainingSecondsChanged?.Invoke();
         }
 
-        
+        public void Dispose()
+        {
+            _notificationService.NotificationAccepted -= NotificationService_NotificationAccepted;
+            _timer.Dispose();
+        }
     }
 }

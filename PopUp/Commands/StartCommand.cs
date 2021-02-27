@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace PopUp.Commands
-{  
+{
     public class StartCommand : BaseCommand
     {
         private readonly TimerViewModel _viewModel;

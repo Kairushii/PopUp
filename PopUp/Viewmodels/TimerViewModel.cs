@@ -9,12 +9,11 @@ using System.Windows.Input;
 
 namespace PopUp.Viewmodels
 {
-    public class TimerViewModel : ViewModelBase
+    public class TimerViewModel : ViewModelBase , IDisposable
     {
-        
-        private int _duration;
         private readonly TimerStore _timerStore;
 
+        private int _duration;
         public int Duration
         {
             get
@@ -24,26 +23,30 @@ namespace PopUp.Viewmodels
             set
             {
                 _duration = value;
-                OnPropertyChanged(nameof(_duration));
+                OnPropertyChanged(nameof(Duration));
             }
         }
 
         public double RemainingSeconds => _timerStore.RemainingSeconds;
 
-        public ICommand StartCommand 
-        { 
-            get; 
-        }
+        public ICommand StartCommand { get; }
+
         public TimerViewModel(TimerStore timerStore)
         {
             _timerStore = timerStore;
             StartCommand = new StartCommand(this, _timerStore);
-            _timerStore.RemainingSecondsChanged += _timerStore_RemainingSecondsChanged;
+
+            _timerStore.RemainingSecondsChanged += TimerStore_RemainingSecondsChanged;
         }
 
-        private void _timerStore_RemainingSecondsChanged()
+        private void TimerStore_RemainingSecondsChanged()
         {
             OnPropertyChanged(nameof(RemainingSeconds));
+        }
+
+        public void Dispose()
+        {
+            _timerStore.RemainingSecondsChanged -= TimerStore_RemainingSecondsChanged;
         }
     }
 }
